@@ -109,5 +109,5 @@ jobs:
           done
 
           podman manifest push $image_base ${{ env.REGISTRY }}/$image_base
-          podman manifest push $image_base ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          podman manifest push $image_base ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
