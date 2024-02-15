@@ -4,7 +4,11 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: odrling/chimera
+  # Chimera linux version
+  VERSION: 20240122
+  # architectures available in the main manifest
+  ARCHS: x86_64 aarch64 riscv64 ppc64 ppc64le
 
 on:
   push:
@@ -23,6 +27,16 @@ jobs:
       # with sigstore/fulcio when running outside of PRs.
       id-token: write
 
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - arch: x86_64
+          - arch: aarch64
+          - arch: riscv64
+          - arch: ppc64
+          - arch: ppc64le
+
     steps:
       - uses: actions/checkout@v4
 
@@ -32,20 +46,17 @@ jobs:
         with:
           images: |
             ${{ env.IMAGE_NAME }}
-          tags: |
-            type=sha
-            type=ref,event=branch
-            type=ref,event=pr
-            type=ref,event=tag
-            type=schedule
 
       - name: Build image
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
-          tags: ${{ github.sha }} ${{ github.ref_name }}
+          tags: ${{ github.sha }}-${{ matrix.config.arch }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            ARCH=${{ matrix.config.arch }}
+            VERSION=${{ env.VERSION }}
           containerfiles: Containerfile
 
       - name: Push image
@@ -57,3 +68,40 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+
+  push_manifest:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Podman login
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: create and push manifest for supported platforms
+        run: |
+          image_base=${{ env.IMAGE_NAME }}:${{ github.sha }}
+          podman manifest create $image_base
+          archs="${{ env.ARCHS }}"
+
+          for arch in $archs; do
+            podman pull ${{ env.REGISTRY }}/$image_base-$arch
+            podman manifest add $image_base ${{ env.REGISTRY }}/$image_base-$arch
+          done
+
+          podman manifest push $image_base ${{ env.REGISTRY }}/$image_base
+          podman manifest push $image_base ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+
