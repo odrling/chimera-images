@@ -32,10 +32,15 @@ jobs:
       matrix:
         config:
           - arch: x86_64
+            platform: linux/amd64
           - arch: aarch64
+            platform: linux/arm64
           - arch: riscv64
+            platform: linux/riscv64
           - arch: ppc64
+            platform: linux/ppc64
           - arch: ppc64le
+            platform: linux/ppc64le
 
     steps:
       - uses: actions/checkout@v4
@@ -51,6 +56,7 @@ jobs:
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
+          platforms: ${{ matrix.config.platform }}
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ github.sha }}-${{ matrix.config.arch }}
           labels: ${{ steps.meta.outputs.labels }}
