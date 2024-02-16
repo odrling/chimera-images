@@ -3,8 +3,7 @@ name: Build and push images
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: odrling/chimera
+  IMAGE_NAME: ${{ github.repository_owner }}/chimera
   # Chimera linux version
   VERSION: 20240122
   # architectures available in the main manifest
