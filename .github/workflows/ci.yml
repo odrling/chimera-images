@@ -110,3 +110,45 @@ jobs:
           podman manifest push $image_base ${{ env.REGISTRY }}/$image_base
           podman manifest push $image_base ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
+  build_cross:
+    needs: push_manifest
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker Metadata
+        id: meta-cross
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.IMAGE_NAME }}
+
+      - name: Build image
+        id: build-cross-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          tags: cross cross-${{ github.sha }}
+          labels: ${{ steps.meta-cross.outputs.labels }}
+          build-args: |
+            ARCH=${{ matrix.config.arch }}
+            VERSION=${{ env.VERSION }}
+          containerfiles: Containerfile.cross
+
+      - name: Push image
+        id: push-image
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-cross-image.outputs.image }}
+          tags: ${{ steps.build-cross-image.outputs.tags }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
