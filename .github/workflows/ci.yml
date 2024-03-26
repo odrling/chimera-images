@@ -139,8 +139,7 @@ jobs:
           tags: cross cross-${{ github.sha }}
           labels: ${{ steps.meta-cross.outputs.labels }}
           build-args: |
-            ARCH=${{ matrix.config.arch }}
-            VERSION=${{ env.VERSION }}
+            TAG=${{ github.sha }}
           containerfiles: Containerfile.cross
 
       - name: Push image
