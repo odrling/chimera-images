@@ -5,7 +5,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/chimera
   # Chimera linux version
-  VERSION: 20240122
+  VERSION: 20240421
   # architectures available in the main manifest
   ARCHS: x86_64 aarch64 riscv64 ppc64 ppc64le
 
