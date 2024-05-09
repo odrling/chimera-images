@@ -1,4 +1,4 @@
 ARG TAG
 FROM ghcr.io/odrling/chimera:$TAG
-RUN apk upgrade && apk add musl-devel base-cross pkgconf meson clang git llvm lld base-cross mold
+RUN apk upgrade && apk add chimera-repo-contrib && apk add musl-devel base-cross pkgconf meson clang git llvm lld base-cross mold go
 
