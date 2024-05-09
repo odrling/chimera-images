@@ -13,6 +13,9 @@ on:
   push:
     branches:
       - main
+  schedule:
+    # rebuild on mondays
+    - cron: '0 19 * * 1'
 
 jobs:
   build:
