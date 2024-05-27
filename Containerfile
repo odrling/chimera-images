@@ -1,4 +1,4 @@
-FROM docker.io/amd64/alpine AS bootstrap
+FROM docker.io/amd64/alpine:3.19 AS bootstrap
 ARG ARCH
 ARG VERSION
 
