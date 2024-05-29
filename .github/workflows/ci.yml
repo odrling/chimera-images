@@ -13,6 +13,7 @@ on:
   push:
     branches:
       - main
+      - "renovate/*"
   schedule:
     # rebuild on mondays
     - cron: '0 19 * * 1'
@@ -68,11 +69,20 @@ jobs:
           containerfiles: Containerfile
 
       - name: Push image
-        id: push-image
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-image.outputs.image }}
-          tags: ${{ steps.build-image.outputs.tags }} ${{ matrix.config.arch }}
+          tags: ${{ github.sha }}-${{ matrix.config.arch }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push arch image
+        if: github.ref == 'refs/heads/main'
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ matrix.config.arch }}
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
@@ -146,11 +156,20 @@ jobs:
           containerfiles: Containerfile.cross
 
       - name: Push image
-        id: push-image
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-cross-image.outputs.image }}
-          tags: ${{ steps.build-cross-image.outputs.tags }}
+          tags: cross-${{ github.sha }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push cross image
+        if: github.ref == 'refs/heads/main'
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-cross-image.outputs.image }}
+          tags: cross
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
