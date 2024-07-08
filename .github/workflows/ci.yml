@@ -8,6 +8,7 @@ env:
   VERSION: 20240707
   # architectures available in the main manifest
   ARCHS: x86_64 aarch64 riscv64 ppc64 ppc64le
+  CROSS_ARCHS: x86_64
 
 on:
   push:
@@ -156,7 +157,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
-          tags: cross cross-${{ github.sha }}
+          tags: cross cross-${{ github.sha }}-${{ matrix.config.arch }}
           labels: ${{ steps.meta-cross.outputs.labels }}
           build-args: |
             TAG=${{ github.sha }}-${{ matrix.config.arch }}
@@ -166,17 +167,42 @@ jobs:
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-cross-image.outputs.image }}
-          tags: cross-${{ github.sha }}
+          tags: cross-${{ github.sha }}-${{ matrix.config.arch }}
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push cross image
-        if: github.ref == 'refs/heads/main'
-        uses: redhat-actions/push-to-registry@v2
+  push_cross_manifest:
+    needs: build_cross
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Podman login
+        uses: redhat-actions/podman-login@v1
         with:
-          image: ${{ steps.build-cross-image.outputs.image }}
-          tags: cross
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: create and push manifest for supported platforms
+        run: |
+          image_base=${{ env.IMAGE_NAME }}:cross-${{ github.sha }}
+          podman manifest create $image_base
+          archs="${{ env.CROSS_ARCHS }}"
+
+          for arch in $archs; do
+            podman pull ${{ env.REGISTRY }}/$image_base-$arch
+            podman manifest add $image_base ${{ env.REGISTRY }}/$image_base-$arch
+          done
+
+          podman manifest push $image_base ${{ env.REGISTRY }}/$image_base
+          podman manifest push $image_base ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:cross
