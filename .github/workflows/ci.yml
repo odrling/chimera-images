@@ -167,7 +167,7 @@ jobs:
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build-cross-image.outputs.image }}
-          tags: cross-${{ github.sha }}-${{ matrix.config.arch }}
+          tags: cross-${{ github.sha }}-${{ matrix.config.arch }} cross-${{ matrix.config.arch }}
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
