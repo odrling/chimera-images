@@ -157,7 +157,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
-          tags: cross cross-${{ github.sha }}-${{ matrix.config.arch }}
+          tags: cross-${{ matrix.config.arch }} cross-${{ github.sha }}-${{ matrix.config.arch }}
           labels: ${{ steps.meta-cross.outputs.labels }}
           build-args: |
             TAG=${{ github.sha }}-${{ matrix.config.arch }}
