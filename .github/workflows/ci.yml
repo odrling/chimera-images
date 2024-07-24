@@ -12,9 +12,6 @@ env:
 
 on:
   push:
-    branches:
-      - main
-      - "renovate/*"
   schedule:
     # rebuild on mondays
     - cron: '0 19 * * 1'
