@@ -15,6 +15,7 @@ on:
   schedule:
     # rebuild on mondays
     - cron: '0 19 * * 1'
+  workflow_dispatch:
 
 jobs:
   build:
