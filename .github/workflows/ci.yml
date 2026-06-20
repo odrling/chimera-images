@@ -45,7 +45,7 @@ jobs:
             platform: linux/ppc64le
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Docker Metadata
         id: meta
@@ -99,7 +99,7 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Podman login
         uses: redhat-actions/podman-login@v1
@@ -141,7 +141,7 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Docker Metadata
         id: meta-cross
@@ -182,7 +182,7 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Podman login
         uses: redhat-actions/podman-login@v1
