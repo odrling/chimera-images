@@ -19,7 +19,6 @@ on:
 
 jobs:
   build_cross:
-    needs: build
     runs-on: ${{ matrix.config.gh_image }}
 
     strategy:
