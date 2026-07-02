@@ -49,7 +49,7 @@ jobs:
 
       - name: Docker Metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             ${{ env.IMAGE_NAME }}
@@ -145,7 +145,7 @@ jobs:
 
       - name: Docker Metadata
         id: meta-cross
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             ${{ env.IMAGE_NAME }}
