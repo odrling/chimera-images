@@ -55,7 +55,7 @@ jobs:
           containerfiles: Containerfile.cross
 
       - name: Push image
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           image: ${{ steps.build-cross-image.outputs.image }}
           tags: cross-${{ github.sha }}-${{ matrix.config.arch }} cross-${{ matrix.config.arch }}
