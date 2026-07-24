@@ -47,7 +47,7 @@ jobs:
 
       - name: Build image
         id: build-cross-image
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@v3
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: cross-${{ matrix.config.arch }} cross-${{ github.sha }}-${{ matrix.config.arch }}
